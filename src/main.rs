@@ -7,6 +7,7 @@ mod point;
 fn main() {
     // Zaimplementuj klasę wektor wraz ze wszystkimi działaniami.
     //Sprawdź czy prawidłowo działa przemienność dodawania za pomocą odpowiedniego zdefiniowania przykładowych wektorów i ich sumy w funkcji main().
+    // ^ sprawdzane w teście #1
 
     //Znajdź kąt pomiędzy wektorem [0,3,0] a [5,5,0]
 
@@ -15,7 +16,7 @@ fn main() {
     let vec030: Vector = Vector::new(0.0, 3.0, 0.0);
     let vec550: Vector = Vector::new(5.0, 5.0, 0.0);
 
-    println!("\tangle between {} and {} = {:.4} rad \n", vec030.to_string(), vec550.to_string(), vec030.angle_degrees(&vec550));
+    println!("\tangle between {} and {} = {:.} degrees or {:.4} rad \n", vec030.to_string(), vec550.to_string(), vec030.angle_degrees(&vec550), vec030.angle_radians(&vec550));
 
     //Znajdź wektor prostopadły do wektorów [4,5,1] i [4,1,3]
 
@@ -34,8 +35,6 @@ fn main() {
     perpendicular.normalize();
 
     println!("\tNormalized vector = {}\n\n", perpendicular.to_string());
-
-
 }
 
 #[cfg(test)]
@@ -44,6 +43,7 @@ mod tests {
     
     #[test]
     fn sub_add_test() {
+        // test, przemienność dodawania
         let v1 = Vector::new(1.0, 2.0, 3.0);
         let v2 = Vector::new(4.0, 5.0, 6.0);
         let v3 = v1 + v2;
@@ -112,5 +112,13 @@ mod tests {
         let vector = Vector::new(1.0, 2.0, -3.0);
         let vec_string = format!("{:.4}", vector.length());
         assert_eq!(vec_string, "3.7417");
+    }
+
+    #[test]
+    fn division_by_zero_test() {
+        let x = 1.0;
+        let vector = Vector::new(x, 2.0, -3.0);
+        let zero_vec = vector / 0.0;
+        assert_eq!(zero_vec.x, x);
     }
 }

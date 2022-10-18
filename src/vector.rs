@@ -1,4 +1,4 @@
-use std::{ops, fmt, string};
+use std::{ops};
 
 use crate::point::*;
 
@@ -57,7 +57,7 @@ impl Vector {
         (self.x * self.x + self.y * self.y + self.z * self.z).sqrt()
     }
 
-    /// Normalizes a vector, which means makes it's length equal to 1
+    /// Normalizes a vector, which means it makes it's length equal to 1
     pub fn normalize(&mut self) {
         let length = self.length();
         self.x /= length;
@@ -65,6 +65,7 @@ impl Vector {
         self.z /= length;
     }
 
+    /// Converts a vector to a string and returns it
     pub fn to_string(&self) -> String {
         let out: String = format!("[{:.2}, {:.2}, {:.2}]", self.x, self.y, self.z);
         out
@@ -107,6 +108,27 @@ impl ops::Mul<f64> for Vector {
             x: self.x * scalar,
             y: self.y * scalar,
             z: self.z * scalar,
+        }
+    }
+}
+
+// / operator overload
+// vector scalar division ([vector] / scalar)
+// in case of division by zero, return the original vector
+impl ops::Div<f64> for Vector {
+    type Output = Vector;
+
+    fn div(self, scalar: f64) -> Vector {
+        if scalar == 0.0 {
+            print!("Warning: division by zero. Vector values were not altered.");
+            return self;
+        } else
+        {
+            Vector {
+                x: self.x / scalar,
+                y: self.y / scalar,
+                z: self.z / scalar,
+            }
         }
     }
 }
