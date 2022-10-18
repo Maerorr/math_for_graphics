@@ -15,7 +15,7 @@ fn main() {
     let vec030: Vector = Vector::new(0.0, 3.0, 0.0);
     let vec550: Vector = Vector::new(5.0, 5.0, 0.0);
 
-    println!("\tangle between {} and {} = {:.4} rad \n", vec030.to_string(), vec550.to_string(), vec030.angle(&vec550));
+    println!("\tangle between {} and {} = {:.4} rad \n", vec030.to_string(), vec550.to_string(), vec030.angle_degrees(&vec550));
 
     //Znajdź wektor prostopadły do wektorów [4,5,1] i [4,1,3]
 
@@ -40,8 +40,6 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
-    use std::vec;
-
     use crate::{vector::Vector, point::Point};
     
     #[test]
@@ -93,7 +91,7 @@ mod tests {
     fn angle_test() {
         let v1 = Vector::new(0.0, 3.0, 0.0);
         let v2 = Vector::new(5.0, 5.0, 0.0);
-        let mut angle = v1.angle(&v2);
+        let mut angle = v1.angle_radians(&v2);
         // simple trick to round decimal places
         // 0.123499 * 10000.0 = 1234.99 -> 1234 -> 1234.0 / 10000.0 = 0.1234
         angle = (angle*10000.0).round() / 10000.0;
@@ -102,10 +100,10 @@ mod tests {
 
     #[test]
     fn normalize_test() {
-        let vector = Vector::new(15.0, 12.0, -15.0);
-        let mut normalized = vector.normalize();
+        let mut vector = Vector::new(15.0, 12.0, -15.0);
+        vector.normalize();
         // because of float precision issues, we need to round the values.
-        let vec_string = format!("{:.5}", normalized.length());
+        let vec_string = format!("{:.5}", vector.length());
         assert_eq!(vec_string, "1.00000");
     }
 

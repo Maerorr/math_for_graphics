@@ -36,7 +36,7 @@ impl Vector {
     }
     
     /// Returns the angle between two vectors in **radians**
-    pub fn angle(&self, other: &Vector) -> f64 {
+    pub fn angle_radians(&self, other: &Vector) -> f64 {
         // get the dot product
         let dot = self.dot(other);
         // calculate lengths of both vectors
@@ -48,19 +48,21 @@ impl Vector {
         cos.acos()
     }
 
+    pub fn angle_degrees(&self, other: &Vector) -> f64 {
+        self.angle_radians(other) * 180.0 / std::f64::consts::PI
+    }
+
     /// Returns the length of a vector
     pub fn length(&self) -> f64 {
         (self.x * self.x + self.y * self.y + self.z * self.z).sqrt()
     }
 
     /// Normalizes a vector, which means makes it's length equal to 1
-    pub fn normalize(&self) -> Vector {
+    pub fn normalize(&mut self) {
         let length = self.length();
-        Vector {
-            x: self.x / length,
-            y: self.y / length,
-            z: self.z / length,
-        }
+        self.x /= length;
+        self.y /= length;
+        self.z /= length;
     }
 
     pub fn to_string(&self) -> String {
