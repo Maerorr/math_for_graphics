@@ -85,6 +85,14 @@ impl ops::Add<Vector> for Vector {
     }
 }
 
+impl ops::AddAssign<Vector> for Vector {
+    fn add_assign(&mut self, other: Vector) {
+        self.x += other.x;
+        self.y += other.y;
+        self.z += other.z;
+    }
+}
+
 // - operator overload
 impl ops::Sub<Vector> for Vector {
     type Output = Vector;
@@ -95,6 +103,14 @@ impl ops::Sub<Vector> for Vector {
             y: self.y - other.y,
             z: self.z - other.z,
         }
+    }
+}
+
+impl ops::SubAssign<Vector> for Vector {
+    fn sub_assign(&mut self, other: Vector) {
+        self.x -= other.x;
+        self.y -= other.y;
+        self.z -= other.z;
     }
 }
 
@@ -109,6 +125,14 @@ impl ops::Mul<f64> for Vector {
             y: self.y * scalar,
             z: self.z * scalar,
         }
+    }
+}
+
+impl ops::MulAssign<f64> for Vector {
+    fn mul_assign(&mut self, scalar: f64) {
+        self.x *= scalar;
+        self.y *= scalar;
+        self.z *= scalar;
     }
 }
 
@@ -129,6 +153,19 @@ impl ops::Div<f64> for Vector {
                 y: self.y / scalar,
                 z: self.z / scalar,
             }
+        }
+    }
+}
+
+impl ops::DivAssign<f64> for Vector {
+    fn div_assign(&mut self, scalar: f64) {
+        if scalar == 0.0 {
+            print!("Warning: division by zero. Vector values were not altered.");
+        } else
+        {
+            self.x /= scalar;
+            self.y /= scalar;
+            self.z /= scalar;
         }
     }
 }

@@ -121,4 +121,21 @@ mod tests {
         let zero_vec = vector / 0.0;
         assert_eq!(zero_vec.x, x);
     }
+
+    #[test]
+    fn ops_assign_test() {
+        let vec1 = Vector::new(1.0, 2.0, 3.0);
+        let vec2 = Vector::new(4.0, 5.0, 6.0);
+        let mut vec3 = vec1;
+        vec3 += vec2;
+        assert_eq!(vec3, Vector::new(5.0, 7.0, 9.0));
+        vec3 -= vec2;
+        assert_eq!(vec3, vec1);
+        vec3 *= 2.0;
+        assert_eq!(vec3, vec1 * 2.0);
+        vec3 /= 2.0;
+        assert_eq!(vec3, vec1);
+        vec3 /= 0.0;
+        assert_eq!(vec3, vec1);
+    }
 }
