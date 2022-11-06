@@ -1,4 +1,5 @@
 use std::{ops};
+use crate::mat4::Mat4;
 
 use crate::point::*;
 
@@ -7,13 +8,14 @@ pub struct Vector {
     pub x: f64,
     pub y: f64,
     pub z: f64,
+    pub w: f64,
 }
 
 impl Vector {
     
     /// Constructor
     pub fn new(x: f64, y: f64, z: f64) -> Vector {
-        Vector { x: x, y: y, z: z }
+        Vector { x: x, y: y, z: z , w: 0.0}
     }
 
     /// create a vector that points from one point to another
@@ -32,6 +34,7 @@ impl Vector {
             x: self.y * other.z - self.z * other.y,
             y: self.z * other.x - self.x * other.z,
             z: self.x * other.y - self.y * other.x,
+            w: self.w,
         }
     }
     
@@ -81,6 +84,7 @@ impl ops::Add<Vector> for Vector {
             x: self.x + other.x,
             y: self.y + other.y,
             z: self.z + other.z,
+            w: self.w,
         }
     }
 }
@@ -102,6 +106,7 @@ impl ops::Sub<Vector> for Vector {
             x: self.x - other.x,
             y: self.y - other.y,
             z: self.z - other.z,
+            w: self.w,
         }
     }
 }
@@ -124,7 +129,21 @@ impl ops::Mul<f64> for Vector {
             x: self.x * scalar,
             y: self.y * scalar,
             z: self.z * scalar,
+            w: self.w,
         }
+    }
+}
+
+impl ops::Mul<Mat4> for Vector {
+    type Output = Vector;
+
+    fn mul(self, mat: Mat4) -> Vector {
+        let mut out = Vector::new(0.0, 0.0, 0.0);
+        out.x = self.x * mat.m[0][0] + self.y * mat.m[1][0] + self.z * mat.m[2][0] + self.w * mat.m[3][0];
+        out.y = self.x * mat.m[0][1] + self.y * mat.m[1][1] + self.z * mat.m[2][1] + self.w * mat.m[3][1];
+        out.z = self.x * mat.m[0][2] + self.y * mat.m[1][2] + self.z * mat.m[2][2] + self.w * mat.m[3][2];
+        out.w = self.x * mat.m[0][3] + self.y * mat.m[1][3] + self.z * mat.m[2][3] + self.w * mat.m[3][3];
+        out
     }
 }
 
@@ -152,6 +171,7 @@ impl ops::Div<f64> for Vector {
                 x: self.x / scalar,
                 y: self.y / scalar,
                 z: self.z / scalar,
+                w: self.w,
             }
         }
     }
@@ -276,5 +296,15 @@ mod tests {
         assert_eq!(vec3, vec1);
         vec3 /= 0.0;
         assert_eq!(vec3, vec1);
+    }
+
+    #[test]
+    fn matrix_mul_test() {
+        use crate::mat4::*;
+        let vec = Vector::new(1.0, 2.0, 3.0);
+        let mut mat = Mat4::identity();
+        mat.scale(Vector::new(2.0, 2.0, 2.0));
+        let vec2 = vec * mat;
+        assert_eq!(vec2, Vector::new(2.0, 4.0, 6.0));
     }
 }

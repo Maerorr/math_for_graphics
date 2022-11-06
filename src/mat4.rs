@@ -1,4 +1,4 @@
-use std::f64::EPSILON;
+use std::{ops};
 use crate::{vector::*, math::*};
 
 // used for partial_eq
@@ -43,14 +43,14 @@ impl Mat4 {
     }
 
     // translate the matrix by a vector
-    pub fn translate(&mut self, Vector { x, y, z }: Vector) {
+    pub fn translate(&mut self, Vector { x, y, z, w}: Vector) {
         self.m[0][3] += x;
         self.m[1][3] += y;
         self.m[2][3] += z;
     }
 
     // scales the matrix by a vector
-    pub fn scale(&mut self, Vector { x, y, z }: Vector) {
+    pub fn scale(&mut self, Vector { x, y, z, w}: Vector) {
         self.m[0][0] *= x;
         self.m[1][1] *= y;
         self.m[2][2] *= z;
@@ -58,7 +58,7 @@ impl Mat4 {
 
     // for information about this algorithm, see:
     // https://en.wikipedia.org/wiki/Rotation_matrix#Rotation_matrix_from_axis_and_angle
-    pub fn rotate(&mut self, angle: f64, Vector { x, y, z }: Vector) {
+    pub fn rotate(&mut self, angle: f64, Vector { x, y, z, w}: Vector) {
         let mut result = Mat4::new();
         let mut axis = Vector::new(x, y, z);
 
@@ -85,6 +85,10 @@ impl Mat4 {
         self.multiply(&result);
     }
 
+    pub fn inverse(&mut self) {
+
+    }
+
     // simple to_string for debugging purposes
     pub fn to_string(&self) -> String {
         let mut out: String = String::new();
@@ -99,6 +103,65 @@ impl Mat4 {
 
 }
 
+// multiply by scalar
+impl ops::Mul<f64> for Mat4 {
+    type Output = Mat4;
+
+    fn mul(self, other: f64) -> Mat4 {
+        let mut result = Mat4::new();
+        for i in 0..4 {
+            for j in 0..4 {
+                result.m[i][j] = self.m[i][j] * other;
+            }
+        }
+        result
+    }
+}
+
+// multiply by scalar
+impl ops::MulAssign<f64> for Mat4 {
+    fn mul_assign(&mut self, other: f64) {
+        for i in 0..4 {
+            for j in 0..4 {
+                self.m[i][j] *= other;
+            }
+        }
+    }
+}
+
+// multiply by matrix
+impl ops::Mul for Mat4 {
+    type Output = Mat4;
+
+    fn mul(self, other: Mat4) -> Mat4 {
+        let mut result = Mat4::new();
+        for i in 0..4 {
+            for j in 0..4 {
+                for k in 0..4 {
+                    result.m[i][j] += self.m[i][k] * other.m[k][j];
+                }
+            }
+        }
+        result
+    }
+}
+
+// multiply by matrix
+impl ops::MulAssign for Mat4 {
+    fn mul_assign(&mut self, other: Mat4) {
+        let mut result = Mat4::new();
+        for i in 0..4 {
+            for j in 0..4 {
+                for k in 0..4 {
+                    result.m[i][j] += self.m[i][k] * other.m[k][j];
+                }
+            }
+        }
+        self.m = result.m;
+    }
+}
+
+// check equality with other matrix
 impl PartialEq for Mat4 {
     fn eq(&self, other: &Mat4) -> bool {
         for i in 0..4 {
