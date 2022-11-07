@@ -4,8 +4,8 @@ use crate::{vector::*, math::*};
 // used for partial_eq
 use float_cmp::{approx_eq, F64Margin};
 
-// 4x4 matrix of f64, column-major
-#[derive(Debug, Clone)]
+// 4x4 matrix of f64, row-major
+#[derive(Debug, Clone, Copy)]
 pub struct Mat4 {
     pub m: [[f64; 4]; 4],
 }
@@ -235,10 +235,16 @@ impl Mat4 {
     pub fn to_string(&self) -> String {
         let mut out: String = String::new();
         for i in 0..4 {
-            out.push_str(&format!(
-                "[{:.2} {:.2} {:.2} {:.2}]\n",
-                self.m[i][0], self.m[i][1], self.m[i][2], self.m[i][3]
-            ));
+            out.push_str("[");
+            for j in 0..4 {
+
+                if self.m[i][j] < 0f64 {
+                    out.push_str(&format!(" {:.3} ", self.m[i][j]));
+                } else {
+                    out.push_str(&format!("  {:.3} ", self.m[i][j]));
+                }
+            }
+            out.push_str("]\n");
         }
         out
     }

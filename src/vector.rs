@@ -1,4 +1,5 @@
 use std::{ops};
+// used for comparing floats
 use float_cmp::{approx_eq, F64Margin};
 use crate::mat4::Mat4;
 
