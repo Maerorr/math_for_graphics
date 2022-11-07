@@ -1,6 +1,7 @@
 use vector::*;
 use point::*;
 use mat4::*;
+use crate::math::as_radians;
 
 mod vector;
 mod point;
@@ -8,15 +9,16 @@ mod mat4;
 mod math;
 
 fn main() {
-    let mut m = Mat4::identity();
-    let mut m2 = Mat4::new();
-    m2.m[3][1] = 2.0;
+    let mut transformation = Mat4::identity();
+    transformation.rotate(as_radians(90.0), Vector::new(0.0, 1.0, 0.0));
 
-    println!("{}", m.to_string());
+    println!("Transformation: {}", transformation.to_string());
 
-    m.multiply(&m2);
+    let mut vector = Vector::new(1.0, 0.0, 0.0);
 
-    println!("{}", m.to_string());
+    vector = vector * transformation;
+
+    println!("Vector: {}", vector.to_string());
 }
 
 #[cfg(test)]

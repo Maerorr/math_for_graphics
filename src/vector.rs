@@ -1,4 +1,5 @@
 use std::{ops};
+use float_cmp::{approx_eq, F64Margin};
 use crate::mat4::Mat4;
 
 use crate::point::*;
@@ -139,10 +140,9 @@ impl ops::Mul<Mat4> for Vector {
 
     fn mul(self, mat: Mat4) -> Vector {
         let mut out = Vector::new(0.0, 0.0, 0.0);
-        out.x = self.x * mat.m[0][0] + self.y * mat.m[1][0] + self.z * mat.m[2][0] + self.w * mat.m[3][0];
-        out.y = self.x * mat.m[0][1] + self.y * mat.m[1][1] + self.z * mat.m[2][1] + self.w * mat.m[3][1];
-        out.z = self.x * mat.m[0][2] + self.y * mat.m[1][2] + self.z * mat.m[2][2] + self.w * mat.m[3][2];
-        out.w = self.x * mat.m[0][3] + self.y * mat.m[1][3] + self.z * mat.m[2][3] + self.w * mat.m[3][3];
+        out.x = self.x * mat.m[0][0] + self.y * mat.m[0][1] + self.z * mat.m[0][2] + self.w * mat.m[0][3];
+        out.y = self.x * mat.m[1][0] + self.y * mat.m[1][1] + self.z * mat.m[1][2] + self.w * mat.m[1][3];
+        out.z = self.x * mat.m[2][0] + self.y * mat.m[2][1] + self.z * mat.m[2][2] + self.w * mat.m[2][3];
         out
     }
 }
@@ -192,12 +192,17 @@ impl ops::DivAssign<f64> for Vector {
 
 impl PartialEq for Vector {
     fn eq(&self, other: &Vector) -> bool {
-        self.x == other.x && self.y == other.y && self.z == other.z
+        // use approx_eq!
+        approx_eq!(f64, self.x, other.x, F64Margin { epsilon: f64::EPSILON, ulps: 4 }) &&
+        approx_eq!(f64, self.y, other.y, F64Margin { epsilon: f64::EPSILON, ulps: 4 }) &&
+        approx_eq!(f64, self.z, other.z, F64Margin { epsilon: f64::EPSILON, ulps: 4 })
+        //self.x == other.x && self.y == other.y && self.z == other.z
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::math::as_radians;
     use super::*;
 
     #[test]
@@ -301,10 +306,15 @@ mod tests {
     #[test]
     fn matrix_mul_test() {
         use crate::mat4::*;
-        let vec = Vector::new(1.0, 2.0, 3.0);
+        let mut vec = Vector::new(1.0, 2.0, 3.0);
         let mut mat = Mat4::identity();
         mat.scale(Vector::new(2.0, 2.0, 2.0));
         let vec2 = vec * mat;
         assert_eq!(vec2, Vector::new(2.0, 4.0, 6.0));
+        vec = Vector::new(1.0, 0.0, 0.0);
+        let mut mat = Mat4::identity();
+        mat.rotate(as_radians(90.0), Vector::new(0.0, 1.0, 0.0));
+        let vec2 = vec * mat;
+        assert_eq!(vec2, Vector::new(0.0, 0.0, -1.0));
     }
 }
