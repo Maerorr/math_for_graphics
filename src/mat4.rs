@@ -379,7 +379,9 @@ mod test {
 
     #[test]
     fn test_translate() {
+        use crate::vector::*;
         let mut m = Mat4::identity();
+        let mut vec = Vector::new(1.0, 1.0, 1.0);
         m.translate(Vector::new(1.0, 2.0, 3.0));
         let result = Mat4 {
             m: [
@@ -389,7 +391,10 @@ mod test {
                 [0.0, 0.0, 0.0, 1.0],
             ],
         };
+        let vec_result = Vector::new(2.0, 3.0, 4.0);
         assert_eq!(m, result);
+        vec = vec * m;
+        assert_eq!(vec, vec_result);
     }
 
     #[test]

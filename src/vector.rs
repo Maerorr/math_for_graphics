@@ -17,7 +17,7 @@ impl Vector {
     
     /// Constructor
     pub fn new(x: f64, y: f64, z: f64) -> Vector {
-        Vector { x: x, y: y, z: z , w: 0.0}
+        Vector { x: x, y: y, z: z , w: 1.0}
     }
 
     /// create a vector that points from one point to another
@@ -72,7 +72,7 @@ impl Vector {
 
     /// Converts a vector to a string and returns it
     pub fn to_string(&self) -> String {
-        let out: String = format!("[{:.2}, {:.2}, {:.2}]", self.x, self.y, self.z);
+        let out: String = format!("[{:.2}, {:.2}, {:.2}, {:.2}]", self.x, self.y, self.z, self.w);
         out
     }
 }
@@ -144,6 +144,7 @@ impl ops::Mul<Mat4> for Vector {
         out.x = self.x * mat.m[0][0] + self.y * mat.m[0][1] + self.z * mat.m[0][2] + self.w * mat.m[0][3];
         out.y = self.x * mat.m[1][0] + self.y * mat.m[1][1] + self.z * mat.m[1][2] + self.w * mat.m[1][3];
         out.z = self.x * mat.m[2][0] + self.y * mat.m[2][1] + self.z * mat.m[2][2] + self.w * mat.m[2][3];
+        out.w = self.x * mat.m[3][0] + self.y * mat.m[3][1] + self.z * mat.m[3][2] + self.w * mat.m[3][3];
         out
     }
 }

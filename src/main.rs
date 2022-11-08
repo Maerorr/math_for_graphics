@@ -42,11 +42,26 @@ fn main() {
     let m4 = m2 * m1;
     println!("We get the following matrix: \n{}", m4.to_string());
     println!("As we can see, the order of multiplication matters.");
-}
 
-#[cfg(test)]
-mod tests {
-    use crate::{vector::Vector, point::Point};
-    
+    println!("\n\nMULTIPLICATION ORDER TEST");
 
+    let mut m1 = Mat4::identity();
+    let mut m2 = Mat4::identity();
+    let mut vec1 = Vector::new(1.0, 1.0, 1.0);
+    let mut vec2 = Vector::new(1.0, 1.0, 1.0);
+
+    m1.translate(Vector::new(1.0, 2.0, 3.0));
+    m2.scale(Vector::new(2.0, 5.0, 10.0));
+
+    println!("We have a vector {}", vec1.to_string());
+    println!("We have two matrices: \n{}and \n{}", m1.to_string(), m2.to_string());
+
+    vec1 = vec1 * m1 * m2;
+    vec2 = vec2 * m2 * m1;
+
+    println!("v1 * m1 * m2 = {}", vec1.to_string());
+    println!("v1 * m2 * m1 = {}", vec2.to_string());
+
+    println!("CONCLUSION: RUST MULTIPLIES FROM LEFT TO RIGHT");
+    println!("as if you typed '(vec * m1) * m2' ");
 }
