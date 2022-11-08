@@ -72,7 +72,7 @@ impl Vector {
 
     /// Converts a vector to a string and returns it
     pub fn to_string(&self) -> String {
-        let out: String = format!("[{:.2}, {:.2}, {:.2}, {:.2}]", self.x, self.y, self.z, self.w);
+        let out: String = format!("[{:.2}, {:.2}, {:.2}]", self.x, self.y, self.z);
         out
     }
 }
