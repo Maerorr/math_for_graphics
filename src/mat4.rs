@@ -266,6 +266,54 @@ impl ops::Mul<f64> for Mat4 {
     }
 }
 
+impl ops::Add for Mat4 {
+    type Output = Mat4;
+
+    fn add(self, other: Mat4) -> Mat4 {
+        let mut result = Mat4::new();
+        for i in 0..4 {
+            for j in 0..4 {
+                result.m[i][j] = self.m[i][j] + other.m[i][j];
+            }
+        }
+        result
+    }
+}
+
+impl ops::AddAssign for Mat4 {
+    fn add_assign(&mut self, other: Mat4) {
+        for i in 0..4 {
+            for j in 0..4 {
+                self.m[i][j] += other.m[i][j];
+            }
+        }
+    }
+}
+
+impl ops::Sub for Mat4 {
+    type Output = Mat4;
+
+    fn sub(self, other: Mat4) -> Mat4 {
+        let mut result = Mat4::new();
+        for i in 0..4 {
+            for j in 0..4 {
+                result.m[i][j] = self.m[i][j] - other.m[i][j];
+            }
+        }
+        result
+    }
+}
+
+impl ops::SubAssign for Mat4 {
+    fn sub_assign(&mut self, other: Mat4) {
+        for i in 0..4 {
+            for j in 0..4 {
+                self.m[i][j] -= other.m[i][j];
+            }
+        }
+    }
+}
+
 // multiply by scalar
 impl ops::MulAssign<f64> for Mat4 {
     fn mul_assign(&mut self, other: f64) {
@@ -469,6 +517,51 @@ mod test {
                 [0.0, 2.0, 0.0, 0.0],
                 [0.0, 0.0, 2.0, 0.0],
                 [1.0, 2.0, 3.0, 1.0],
+            ],
+        };
+        assert_eq!(m, result);
+    }
+
+    #[test]
+    fn add_test() {
+        let mut m = Mat4::identity();
+        m.scale(Vector::new(2.0, 2.0, 2.0));
+        m.translate(Vector::new(1.0, 2.0, 3.0));
+        println!("we have a matrix: \n{}", m.to_string());
+
+        let mut m2 = Mat4::identity();
+        m2.scale(Vector::new(2.0, 2.0, 2.0));
+        m2.translate(Vector::new(1.0, 2.0, 3.0));
+
+        println!("we add it with a matrix: \n{}", m2.to_string());
+        m += m2;
+        let result = Mat4 {
+            m: [
+                [4.0, 0.0, 0.0, 2.0],
+                [0.0, 4.0, 0.0, 4.0],
+                [0.0, 0.0, 4.0, 6.0],
+                [0.0, 0.0, 0.0, 2.0],
+            ],
+        };
+        println!("the result is: \n{}", m.to_string());
+        assert_eq!(m, result);
+    }
+
+    #[test]
+    fn sub_test() {
+        let mut m = Mat4::identity();
+        m.scale(Vector::new(2.0, 2.0, 2.0));
+        m.translate(Vector::new(1.0, 2.0, 3.0));
+        let mut m2 = Mat4::identity();
+        m2.scale(Vector::new(2.0, 2.0, 2.0));
+        m2.translate(Vector::new(1.0, 2.0, 3.0));
+        m -= m2;
+        let result = Mat4 {
+            m: [
+                [0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0],
             ],
         };
         assert_eq!(m, result);
