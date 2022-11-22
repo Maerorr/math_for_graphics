@@ -4,6 +4,7 @@ use float_cmp::{approx_eq, F64Margin};
 use crate::mat4::Mat4;
 
 use crate::point::*;
+use crate::quaternion::Quaternion;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Vector {
@@ -68,6 +69,26 @@ impl Vector {
         self.x /= length;
         self.y /= length;
         self.z /= length;
+    }
+
+    // rotates self by a given quaternion
+    // algorithm https://gamedev.stackexchange.com/questions/28395/rotating-vector3-by-a-quaternion
+    pub fn rotate_by_quaternion(&mut self, q: &Quaternion) {
+        // Extract the vector part of the quaternion
+        let u = Vector::new(q.ivec.x, q.ivec.y, q.ivec.z);
+        // Extract the scalar part of the quaternion
+        let s = q.real;
+        // Do the math
+        // vprime = 2.0f * dot(u, v) * u
+        //     + (s*s - dot(u, u)) * v
+        //     + 2.0f * s * cross(u, v);
+        let mut vprime = u * 2.0 * u.dot(self) +
+                            *self * (s * s - u.dot(&u)) +
+                            u.cross(self) * 2.0 * s;
+        // Copy the result back into self
+        self.x = vprime.x;
+        self.y = vprime.y;
+        self.z = vprime.z;
     }
 
     /// Converts a vector to a string and returns it
@@ -318,5 +339,15 @@ mod tests {
         mat.rotate(as_radians(90.0), Vector::new(0.0, 1.0, 0.0));
         let vec2 = vec * mat;
         assert_eq!(vec2, Vector::new(0.0, 0.0, -1.0));
+    }
+
+    #[test]
+    fn quaternion_rotation_test() {
+        use crate::quaternion::*;
+        let mut vec = Vector::new(1.0, 0.0, 0.0);
+        let mut quat = Quaternion::identity();
+        quat.rotate(as_radians(90.0), Vector::new(0.0, 1.0, 0.0));
+        vec.rotate_by_quaternion(&quat);
+        assert_eq!(vec, Vector::new(0.0, 0.0, -1.0));
     }
 }

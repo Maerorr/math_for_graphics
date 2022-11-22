@@ -2,66 +2,41 @@ use vector::*;
 use point::*;
 use mat4::*;
 use crate::math::as_radians;
+use crate::quaternion::Quaternion;
 
 mod vector;
 mod point;
 mod mat4;
 mod math;
+mod quaternion;
 
 fn main() {
-    let mut transformation = Mat4::identity();
-    transformation.rotate(as_radians(90.0), Vector::new(0.0, 1.0, 0.0));
+    println!("\n-----------------------------START------------------------------\n");
+    let mut vect = Vector::new(-1.0, -1.0, -1.0);
+    let mut vect_mat = Vector::new(-1.0, -1.0, -1.0);
+    println!("We have a vector: {}", vect.to_string());
+    let mut q = Quaternion::identity();
+    println!("Create a unit quaternion: {}", q.to_string());
+    q.rotate(as_radians(270.0), Vector::new(1.0, 0.0, 0.0));
+    println!("Rotate the quaternion by 270 deg on x axis: {}", q.to_string());
+    q.rotate_vec(&mut vect);
+    println!("Rotate the vector by this quaternion: {}", vect.to_string());
 
-    let mut vector = Vector::new(1.0, 0.0, 0.0);
+    let mat = q.to_mat4();
+    vect_mat = vect_mat * mat;
+    println!("Rotating the same vector with quaternion as a matrix: {}", vect_mat.to_string());
 
-    println!("We take out vector: {}", vector.to_string());
-    println!("We rotate it by 90 degrees around the y axis with the following matrix:");
-    println!("{}", transformation.to_string());
+    println!("\n----------------------------------------------------------------\n");
+    let mut q1 = Quaternion::identity();
+    let mut q2 = Quaternion::identity();
+    q1.rotate(as_radians(42.0), Vector::new(1.0, 0.0, 0.0));
+    q2.rotate(as_radians(133.0), Vector::new(0.0, 0.0, 1.0));
+    println!("Create two quaternions: {} and {}", q1.to_string(), q2.to_string());
 
-    vector = vector * transformation;
-
-    println!("Our vector rotated by 90deg on Y-axis: {}\n", vector.to_string());
-
-    println!("Now, we will show that matrix multiplication is not commutative.");
-
-    let mut m1 = Mat4::identity();
-    let mut m2 = Mat4::identity();
-
-    m1.translate(Vector::new(1.0, 2.0, 3.0));
-    m2.translate(Vector::new(3.0, 2.0, 1.0));
-    m1.rotate(as_radians(90.0), Vector::new(0.0, 1.0, 0.0));
-    m2.rotate(as_radians(123.0), Vector::new(0.0, 1.0, 0.0));
-    m1.rotate(as_radians(45.0), Vector::new(0.0, 0.0, 1.0));
-    m2.rotate(as_radians(45.0), Vector::new(1.0, 0.0, 0.0));
-
-    println!("We have two matrices: \n{}and \n{}", m1.to_string(), m2.to_string());
-    println!("We multiply them in the following order: m1 * m2");
-    let m3 = m1 * m2;
-    println!("We get the following matrix: \n{}", m3.to_string());
-    println!("Now, we multiply them in the opposite order: m2 * m1");
-    let m4 = m2 * m1;
-    println!("We get the following matrix: \n{}", m4.to_string());
-    println!("As we can see, the order of multiplication matters.");
-
-    println!("\n\nMULTIPLICATION ORDER TEST");
-
-    let mut m1 = Mat4::identity();
-    let mut m2 = Mat4::identity();
-    let mut vec1 = Vector::new(1.0, 1.0, 1.0);
-    let mut vec2 = Vector::new(1.0, 1.0, 1.0);
-
-    m1.translate(Vector::new(1.0, 2.0, 3.0));
-    m2.scale(Vector::new(2.0, 5.0, 10.0));
-
-    println!("We have a vector {}", vec1.to_string());
-    println!("We have two matrices: \n{}and \n{}", m1.to_string(), m2.to_string());
-
-    vec1 = vec1 * m1 * m2;
-    vec2 = vec2 * m2 * m1;
-
-    println!("v1 * m1 * m2 = {}", vec1.to_string());
-    println!("v1 * m2 * m1 = {}", vec2.to_string());
-
-    println!("CONCLUSION: RUST MULTIPLIES FROM LEFT TO RIGHT");
-    println!("as if you typed '(vec * m1) * m2' ");
+    let q3 = q1 * q2;
+    let q4 = q2 * q1;
+    println!("q1 * q2: {}", q3.to_string());
+    println!("q2 * q1: {}", q4.to_string());
+    println!("q1 * q2 != q2 * q1");
+    println!("\n-----------------------------END--------------------------------\n");
 }
