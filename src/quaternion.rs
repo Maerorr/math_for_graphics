@@ -73,11 +73,13 @@ impl Quaternion {
 
     pub fn inverse(&mut self) {
         let mut quat = Quaternion::new(self.real, self.ivec * -1.0);
-        let inv = 1.0 / (self.real.powi(2) * self.ivec.dot(&self.ivec));
-        if approx_eq!(f64, inv, 0.0, F64Margin { epsilon: f64::EPSILON, ulps: 4 }) {
+        let divisor = self.real.powi(2) * self.ivec.dot(&self.ivec);
+        if approx_eq!(f64, divisor, 0.0, F64Margin { epsilon: f64::EPSILON, ulps: 4 }) {
             print!("Warning: division by zero. Quaternion values were not altered.");
             return;
         }
+        let inv = 1.0 / divisor;
+
         quat *= inv;
 
         self.real = quat.real;
@@ -262,5 +264,15 @@ mod test {
         vec1 = vec1 * quat_mat;
         vec2 = vec2 * other_mat;
         assert_eq!(vec1, vec2);
+    }
+
+    #[test]
+    fn inverse_test() {
+        let mut quat = Quaternion {
+            real: 0.0,
+            ivec: Vector::new(0.0, 0.0, 0.0),
+        };
+        quat.inverse();
+        // will print an error and not change values
     }
 }

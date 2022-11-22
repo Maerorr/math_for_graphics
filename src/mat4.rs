@@ -527,13 +527,11 @@ mod test {
         let mut m = Mat4::identity();
         m.scale(Vector::new(2.0, 2.0, 2.0));
         m.translate(Vector::new(1.0, 2.0, 3.0));
-        println!("we have a matrix: \n{}", m.to_string());
 
         let mut m2 = Mat4::identity();
         m2.scale(Vector::new(2.0, 2.0, 2.0));
         m2.translate(Vector::new(1.0, 2.0, 3.0));
 
-        println!("we add it with a matrix: \n{}", m2.to_string());
         m += m2;
         let result = Mat4 {
             m: [
@@ -543,7 +541,6 @@ mod test {
                 [0.0, 0.0, 0.0, 2.0],
             ],
         };
-        println!("the result is: \n{}", m.to_string());
         assert_eq!(m, result);
     }
 
