@@ -12,6 +12,10 @@ impl Point {
         Point { x: x, y: y, z: z }
     }
 
+    pub fn from_vector(v: &Vector) -> Point {
+        Point { x: v.x, y: v.y, z: v.z }
+    }
+
     // distance between two points
     pub fn distance(&self, other: &Point) -> f64 {
         let dx = self.x - other.x;
