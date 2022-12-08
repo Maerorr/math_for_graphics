@@ -100,7 +100,7 @@ pub fn intersection_line_of_two_surfaces() {
 
 
 pub fn intersection_of_two_segments() {
-    println!("Excercise 7 and  8. Find an intersection point (if exists) between two segments");
+    println!("\nExcercise 7 and  8. Find an intersection point (if exists) between two segments");
     // segment 1
     let p1 = Vector::new(5.0, 5.0, 4.0);
     let q1 = Vector::new(10.0, 10.0, 6.0);
@@ -165,7 +165,7 @@ pub fn intersection_of_two_segments() {
 }
 
 pub fn first_intersection_point_of_line_and_sphere() {
-    println!("Excercise 9. Find one intersection point of a line and a sphere");
+    println!("\nExcercise 9. Find one intersection point of a line and a sphere");
     let c = Vector::new(0.0, 0.0, 0.0);
     let r_pow2 = 26_f64;
     // changing the point of viev aka swapping p and q changes which intersection we get
@@ -175,8 +175,8 @@ pub fn first_intersection_point_of_line_and_sphere() {
     // this normalization is needed
     v.normalize();
     let w = c - p;
-    println!("v: {}", v.to_string());
-    println!("w: {}", w.to_string());
+    //println!("v: {}", v.to_string());
+    //println!("w: {}", w.to_string());
     let l = w.dot(&v);
 
     // both a and d are SQUARED values
@@ -192,7 +192,7 @@ pub fn first_intersection_point_of_line_and_sphere() {
 }
 
 fn main() {
-    // checked in geogebra 3d, lines do NOT intersect
+    // checked in geogebra 3d, lines do NOT intersect, so our output are two points closest together
     intersection_between_two_lines_and_angle_between_them();
 
     // checked in geogebra 3d
@@ -204,6 +204,6 @@ fn main() {
     // checked
     intersection_of_two_segments();
 
-    // checked in geogebra 3d
+    // checked
     first_intersection_point_of_line_and_sphere();
 }
