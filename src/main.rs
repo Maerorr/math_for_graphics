@@ -2,6 +2,7 @@ use float_cmp::{approx_eq, F64Margin};
 use vector::*;
 use point::*;
 use mat4::*;
+use crate::line::Line;
 use crate::math::as_radians;
 use crate::quaternion::Quaternion;
 
@@ -10,11 +11,13 @@ mod point;
 mod mat4;
 mod math;
 mod quaternion;
+mod surface;
+mod line;
 
 pub fn intersection_between_two_lines_and_angle_between_them() {
     println!("Excercise 1 and 2. Find an intersection point (if exists) between two lines and angle between them");
     let p1 = Vector::new(-2.0, 5.0, 0.0);
-    let p2 = Vector::new(-2.0, 4.0, 0.0);
+    let p2 = Vector::new(-2.0, 5.0, 0.0);
     let v1 = Vector::new(3.0, 1.0, 5.0);
     let v2 = Vector::new(1.0, -5.0, 3.0);
 
@@ -32,6 +35,23 @@ pub fn intersection_between_two_lines_and_angle_between_them() {
 
     let angle = v1.angle_degrees(&v2);
     println!("angle: {:.2} deg", angle);
+}
+
+pub fn intersection_between_two_lines_but_using_structs() {
+    println!("INTERSECTIONS BUT USING NEW STRUCTS");
+    let p1 = Vector::new(-2.0, 5.0, 0.0);
+    let p2 = Vector::new(-2.0, 5.0, 0.0);
+    let v1 = Vector::new(3.0, 1.0, 5.0);
+    let v2 = Vector::new(1.0, -5.0, 3.0);
+
+    let line1 = Line::new(p1, v1);
+    let line2 = Line::new(p2, v2);
+
+    let intersection = line1.intersection(&line2);
+    match intersection {
+        Some(p) => println!("intersection: {}", p.to_string()),
+        None => println!("no intersection"),
+    }
 }
 
 pub fn intersection_between_line_and_surface_and_angle_between_them() {
@@ -195,15 +215,17 @@ fn main() {
     // checked in geogebra 3d, lines do NOT intersect, so our output are two points closest together
     intersection_between_two_lines_and_angle_between_them();
 
+    intersection_between_two_lines_but_using_structs();
+
     // checked in geogebra 3d
-    intersection_between_line_and_surface_and_angle_between_them();
+    //intersection_between_line_and_surface_and_angle_between_them();
 
     // checked
-    intersection_line_of_two_surfaces();
+    //intersection_line_of_two_surfaces();
 
     // checked
-    intersection_of_two_segments();
+    //intersection_of_two_segments();
 
     // checked
-    first_intersection_point_of_line_and_sphere();
+    //first_intersection_point_of_line_and_sphere();
 }

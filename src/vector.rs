@@ -63,6 +63,9 @@ impl Vector {
         (self.x * self.x + self.y * self.y + self.z * self.z).sqrt()
     }
 
+    pub fn length_squared(&self) -> f64 {
+        self.x * self.x + self.y * self.y + self.z * self.z
+    }
     /// Normalizes a vector, which means it makes it's length equal to 1
     pub fn normalize(&mut self) {
         let length = self.length();
