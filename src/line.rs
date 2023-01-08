@@ -1,5 +1,6 @@
 use float_cmp::{approx_eq, F64Margin};
 use crate::point::Point;
+use crate::surface::Surface;
 use crate::vector::Vector;
 
 pub struct Line {
@@ -32,6 +33,34 @@ impl Line {
             Some(p1)
         } else {
             None
+        }
+    }
+
+    pub fn angle_degrees(&self, other: &Line) -> f64 {
+        let angle = self.direction.angle_degrees(&other.direction);
+        angle
+    }
+
+    pub fn angle_radians(&self, other: &Line) -> f64 {
+        let angle = self.direction.angle_radians(&other.direction);
+        angle
+    }
+
+    // returns the expression p + tv
+    pub fn point_on_line(&self, t: &f64) -> Vector {
+        self.point + self.direction * *t
+    }
+
+    // Returns the point of intersection if they intersect. Otherwise returns None.
+    pub fn intersection_surface(&self, surface: &Surface) -> Option<Vector> {
+        let parallel_check = self.direction.dot(&surface.normal);
+        if approx_eq!(f64, parallel_check, 0.0, F64Margin::default()) {
+            None
+        } else {
+            let t = ((surface.normal * -1.0).dot(&(self.point - surface.point)))
+                / (surface.normal.dot(&self.direction));
+            let intersection = self.point_on_line(&t);
+            Some(intersection)
         }
     }
 }

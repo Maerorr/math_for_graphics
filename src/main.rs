@@ -59,7 +59,6 @@ pub fn intersection_between_line_and_surface_and_angle_between_them() {
     let v = Vector::new(3.0, -1.0, 2.0);
 
     let n = Vector::new(2.0, 3.0, 3.0);
-    // here, equation 2x+3y+3z-8=0 is solved for (x,y,z) = (1,1,1) or (4,0,0)
     let q = Vector::new(4.0, 0.0, 0.0);
 
     let parallel_check = v.dot(&n);
@@ -74,6 +73,23 @@ pub fn intersection_between_line_and_surface_and_angle_between_them() {
         let angle = v.angle_degrees(&n);
         println!("angle: {:.2} deg", angle);
         println!("because our 'angle' is between line and the surface normal it will be 90 - (angle between line and surface)");
+    }
+}
+
+pub fn intersection_line_surface_but_new_structs() {
+    let p = Vector::new(-2.0, 2.0, -1.0);
+    let v = Vector::new(3.0, -1.0, 2.0);
+
+    let n = Vector::new(2.0, 3.0, 3.0);
+    let q = Vector::new(4.0, 0.0, 0.0);
+
+    let line = Line::new(p, v);
+    let surface = surface::Surface::new(q, n);
+
+    let intersection = line.intersection_surface(&surface);
+    match intersection {
+        Some(p) => println!("intersection: {}", p.to_string()),
+        None => println!("no intersection"),
     }
 }
 
@@ -212,20 +228,4 @@ pub fn first_intersection_point_of_line_and_sphere() {
 }
 
 fn main() {
-    // checked in geogebra 3d, lines do NOT intersect, so our output are two points closest together
-    intersection_between_two_lines_and_angle_between_them();
-
-    intersection_between_two_lines_but_using_structs();
-
-    // checked in geogebra 3d
-    //intersection_between_line_and_surface_and_angle_between_them();
-
-    // checked
-    //intersection_line_of_two_surfaces();
-
-    // checked
-    //intersection_of_two_segments();
-
-    // checked
-    //first_intersection_point_of_line_and_sphere();
 }
