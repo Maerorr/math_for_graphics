@@ -1,4 +1,5 @@
 use float_cmp::{approx_eq, F64Margin};
+use crate::object::Object;
 use crate::point::Point;
 use crate::surface::Surface;
 use crate::vector::Vector;
@@ -52,7 +53,7 @@ impl Line {
     }
 
     // Returns the point of intersection if they intersect. Otherwise returns None.
-    pub fn intersection_surface(&self, surface: &Surface) -> Option<Vector> {
+    pub fn intersection_surface(&self, surface: &Surface) -> Option<(Vector, f64)> {
         let parallel_check = self.direction.dot(&surface.normal);
         if approx_eq!(f64, parallel_check, 0.0, F64Margin::default()) {
             None
@@ -60,8 +61,36 @@ impl Line {
             let t = ((surface.normal * -1.0).dot(&(self.point - surface.point)))
                 / (surface.normal.dot(&self.direction));
             let intersection = self.point_on_line(&t);
-            Some(intersection)
+            let (t, s) = surface.get_t_s_from_point(&intersection);
+            let angle = self.direction.angle_radians(&surface.normal);
+
+            // this checks if the intersection isnt outside of out bound surface (a rectangle)
+            if surface.point_on_surface(&t, &s).is_none() {
+                None
+            } else {
+                Some((intersection, angle))
+            }
         }
+    }
+
+    pub fn intersection_object(&self, obj: &Object, cam_pos: &Vector) -> Option<(Vector, f64)> {
+        let mut closest_intersection: Option<(Vector, f64)> = None;
+        let mut closest_distance: f64 = 0.0;
+        for surface in &obj.surfaces {
+            let intersection = self.intersection_surface(&surface);
+            if intersection.is_some() {
+                let intersection = intersection.unwrap();
+                let distance = (*cam_pos - intersection.0).length();
+                if closest_intersection.is_none() {
+                    closest_intersection = Some((intersection.0, intersection.1));
+                    closest_distance = distance;
+                } else if distance < closest_distance {
+                    closest_intersection = Some((intersection.0, intersection.1));
+                    closest_distance = distance;
+                }
+            }
+        }
+        closest_intersection
     }
 }
 

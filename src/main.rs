@@ -1,10 +1,18 @@
+use std::fs::File;
+use std::io::Write;
 use float_cmp::{approx_eq, F64Margin};
+use raylib::ffi::ImageFormat;
 use vector::*;
 use point::*;
 use mat4::*;
 use crate::line::Line;
-use crate::math::as_radians;
+use crate::math::{as_degrees, as_radians};
 use crate::quaternion::Quaternion;
+use crate::surface::Surface;
+
+use raylib::prelude::*;
+use cstr::cstr;
+use crate::object::Object;
 
 mod vector;
 mod point;
@@ -13,6 +21,7 @@ mod math;
 mod quaternion;
 mod surface;
 mod line;
+mod object;
 
 pub fn intersection_between_two_lines_and_angle_between_them() {
     println!("Excercise 1 and 2. Find an intersection point (if exists) between two lines and angle between them");
@@ -77,20 +86,20 @@ pub fn intersection_between_line_and_surface_and_angle_between_them() {
 }
 
 pub fn intersection_line_surface_but_new_structs() {
-    let p = Vector::new(-2.0, 2.0, -1.0);
-    let v = Vector::new(3.0, -1.0, 2.0);
-
-    let n = Vector::new(2.0, 3.0, 3.0);
-    let q = Vector::new(4.0, 0.0, 0.0);
-
-    let line = Line::new(p, v);
-    let surface = surface::Surface::new(q, n);
-
-    let intersection = line.intersection_surface(&surface);
-    match intersection {
-        Some(p) => println!("intersection: {}", p.to_string()),
-        None => println!("no intersection"),
-    }
+    // let p = Vector::new(-2.0, 2.0, -1.0);
+    // let v = Vector::new(3.0, -1.0, 2.0);
+    //
+    // let n = Vector::new(2.0, 3.0, 3.0);
+    // let q = Vector::new(4.0, 0.0, 0.0);
+    //
+    // let line = Line::new(p, v);
+    // let surface = surface::Surface::new_normal(q, n);
+    //
+    // let intersection = line.intersection_surface(&surface);
+    // match intersection {
+    //     Some(p) => println!("intersection: {}", p.to_string()),
+    //     None => println!("no intersection"),
+    // }
 }
 
 pub fn intersection_line_of_two_surfaces() {
@@ -227,5 +236,194 @@ pub fn first_intersection_point_of_line_and_sphere() {
     }
 }
 
+// global constants
+static WIDTH: i32 = 1000;
+static HEIGHT: i32 = 1000;
+
+const RENDER_WIDTH: i32 = 60;
+const RENDER_HEIGHT: i32 = 60;
+
+static PIXEL_SIZE: usize = 12;
+
+// background color
+static BG_COLOR: Color = Color {
+    r: 0,
+    g: 172,
+    b: 210,
+    a: 255,
+};
+
+pub fn save_to_file(hits: &Vec<Vec<bool>>) {
+    //save to file as ASCII
+    let mut file = File::create("output.txt").unwrap();
+
+    for (i, hit) in hits.iter().enumerate() {
+        for (j, h) in hit.iter().enumerate() {
+            if *h {
+                file.write(b"0").unwrap();
+            } else {
+                file.write(b".").unwrap();
+            }
+        }
+        file.write(b"\n").unwrap();
+    }
+}
+
+pub fn draw_slider(d: &mut RaylibDrawHandle, text: String, x: i32, y: &mut i32, value: &f32, range: (f32, f32)) -> f32 {
+    d.draw_text(text.as_str(), x, *y, 32, Color::WHITE);
+
+    let out = d.gui_slider_bar(
+        Rectangle::new((x + 125) as f32, *y as f32, 300.0, 30.0),
+        None,
+        None,
+        *value,
+        range.0, range.1);
+
+    d.draw_text(&format!("{:.2}", out), x + 250, *y, 32, Color::DARKGRAY);
+    *y += 50;
+    out
+}
+
 fn main() {
+    // window init
+    let (mut rl, thread) = raylib::init()
+        .size(WIDTH, HEIGHT)
+        .title("ray casting")
+        .build();
+    rl.set_target_fps(72);
+    // window init
+
+    // let mut surface = Surface::new_vw(
+    //     Vector::new(30.0, 30.0, 0.0),
+    //     Vector::new(1.0, 0.0, 0.0),
+    //     Vector::new(0.0, 1.0, 0.0),
+    //     (-15.0, 15.0),
+    //     (-15.0, 15.0));
+
+    // initialize surfaces that create a cube
+    let mut front = Surface::new_vw(
+        Vector::new(0.0, 0.0, 15.0),
+        Vector::new(1.0, 0.0, 0.0),
+        Vector::new(0.0, 1.0, 0.0),
+        (-15.0, 15.0),
+        (-15.0, 15.0),
+        Vector::new(0.0, 0.0, -1.0));
+    let mut back = Surface::new_vw(
+        Vector::new(0.0, 0.0, -15.0),
+        Vector::new(1.0, 0.0, 0.0),
+        Vector::new(0.0, 1.0, 0.0),
+        (-15.0, 15.0),
+        (-15.0, 15.0),
+        Vector::new(0.0, 0.0, 1.0));
+    let mut left = Surface::new_vw(
+        Vector::new(-15.0, 0.0, 0.0),
+        Vector::new(0.0, 0.0, 1.0),
+        Vector::new(0.0, 1.0, 0.0),
+        (-15.0, 15.0),
+        (-15.0, 15.0),
+        Vector::new(1.0, 0.0, 0.0));
+    let mut right = Surface::new_vw(
+        Vector::new(15.0, 0.0, 0.0),
+        Vector::new(0.0, 0.0, 1.0),
+        Vector::new(0.0, 1.0, 0.0),
+        (-15.0, 15.0),
+        (-15.0, 15.0),
+        Vector::new(-1.0, 0.0, 0.0));
+    let mut top = Surface::new_vw(
+        Vector::new(0.0, 15.0, 0.0),
+        Vector::new(1.0, 0.0, 0.0),
+        Vector::new(0.0, 0.0, 1.0),
+        (-15.0, 15.0),
+        (-15.0, 15.0),
+        Vector::new(0.0, -1.0, 0.0));
+    let mut bottom = Surface::new_vw(
+        Vector::new(0.0, -15.0, 0.0),
+        Vector::new(1.0, 0.0, 0.0),
+        Vector::new(0.0, 0.0, 1.0),
+        (-15.0, 15.0),
+        (-15.0, 15.0),
+        Vector::new(0.0, 1.0, 0.0));
+
+    let mut surfaces = vec![front, back, left, right, top, bottom];
+    //let mut surfaces = vec![back, left, right,front];
+    let mut surfaces = Object::new(surfaces);
+
+    let mut hits: Vec<Vec<bool>> = vec![vec![false; RENDER_HEIGHT as usize]; RENDER_WIDTH as usize];
+    let mut angles: Vec<Vec<f64>> = vec![vec![0.0; RENDER_HEIGHT as usize]; RENDER_WIDTH as usize];
+
+    let mut ray = Line::new(
+        Vector::new(0.0, 0.0, 5.0),
+        Vector::new(0.0, 0.0, -1.0));
+
+    let mut camera = Camera2D {
+        offset: Default::default(),
+        target: Vector2::new(0.0, 0.0),
+        rotation: 0.0,
+        zoom: 1.0,
+    };
+
+    let mut q: Quaternion = Quaternion::identity();
+    q.rotate(as_radians(2.0), Vector::new(0.0, 1.0, 0.0));
+
+    // let mut image = Image::gen_image_color(RENDER_WIDTH, RENDER_HEIGHT, Color::BLACK);
+    // Image::set_format(&mut image, PixelFormat::PIXELFORMAT_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+    // let mut texture = rl.load_texture_from_image(&thread, &image).unwrap();
+    // let mut hit_colors: [u8; (RENDER_WIDTH * RENDER_HEIGHT * 4) as usize] = [0; RENDER_WIDTH as usize * RENDER_HEIGHT as usize * 4];
+    let (mut x, mut y, mut z) = (0.0, 0.0, 0.0);
+
+    let mut camera_position = Vector::new(-30.0, -30.0, 30.0);
+
+    while !rl.window_should_close() {
+        let mut d = rl.begin_drawing(&thread);
+        d.clear_background(BG_COLOR);
+        for i in 0..RENDER_HEIGHT {
+            for j in 0..RENDER_WIDTH {
+                ray.point = camera_position + Vector::new(i as f64, j as f64, 0.0);
+
+                let hit = ray.intersection_object(&surfaces, &camera_position);
+                if hit.is_some() {
+                    hits[i as usize][j as usize] = true;
+                    angles[i as usize][j as usize] = hit.unwrap().1;
+                } else {
+                    hits[i as usize][j as usize] = false;
+                }
+            }
+        }
+
+        // RaylibTexture2D::update_texture(&mut texture, &hit_colors);
+
+        {
+            let mut d2d = d.begin_mode2D(camera);
+            for (i, hit) in hits.iter().enumerate() {
+                for (j, h) in hit.iter().enumerate() {
+                    if *h {
+                        let color = Color::color_from_hsv(1.0, 1.0, (angles[i][j].cos() as f32));
+                        d2d.draw_rectangle((i * PIXEL_SIZE) as i32, (j * PIXEL_SIZE) as i32,PIXEL_SIZE as i32, PIXEL_SIZE as i32, color);
+                        //d2d.draw_pixel(i as i32, j as i32,  Color::WHITE);
+                    } else {
+                        d2d.draw_rectangle((i * PIXEL_SIZE) as i32, (j * PIXEL_SIZE) as i32, PIXEL_SIZE as i32, PIXEL_SIZE as i32, Color::BLACK);
+                        //d2d.draw_pixel(i as i32, j as i32, Color::BLACK);
+                    }
+                }
+            }
+        }
+
+        if d.gui_button(Rectangle::new(740.0, 900.0,100.0, 50.0), None) {
+            save_to_file(&hits);
+        }
+        d.draw_text("save", 750, 900, 32, Color::WHITE);
+        q = Quaternion::identity();
+
+        let mut slider_height = 750;
+        x = draw_slider(&mut d, "x rot".to_string(), 25, &mut slider_height, &mut x, (-30.0, 30.0));
+        y = draw_slider(&mut d, "y rot".to_string(), 25, &mut slider_height, &mut y, (-30.0, 30.0));
+        z = draw_slider(&mut d, "z rot".to_string(), 25, &mut slider_height, &mut z, (-30.0, 30.0));
+        q.rotate(as_radians(x as f64), Vector::new(1.0, 0.0, 0.0));
+        q.rotate(as_radians(y as f64), Vector::new(0.0, 1.0, 0.0));
+        q.rotate(as_radians(z as f64), Vector::new(0.0, 0.0, 1.0));
+
+       surfaces.rotate(&q);
+        //println!("v: {}, w: {}, n: {}", surface.v.unwrap().to_string(), surface.w.unwrap().to_string(), surface.normal.to_string());
+
+    }
 }
