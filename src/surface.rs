@@ -73,4 +73,20 @@ impl Surface {
         self.point.rotate_by_quaternion(&q);
         self.normal.rotate_by_quaternion(&q);
     }
+
+    pub fn scale(&mut self, s: &f64) {
+        self.point.x *= s;
+        self.point.y *= s;
+        self.point.z *= s;
+
+        let (mut v1, mut v2) = self.max_v.unwrap();
+        v1 *= s;
+        v2 *= s;
+        self.max_v = Some((v1, v2));
+        let (mut v1, mut v2) = self.max_w.unwrap();
+        v1 *= s;
+        v2 *= s;
+        self.max_w = Some((v1, v2));
+
+    }
 }

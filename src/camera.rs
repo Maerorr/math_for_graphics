@@ -12,6 +12,7 @@ pub struct Camera {
     pub right: Vector,
     default: (Vector, Vector),
     rotation: Quaternion,
+    debug: String,
 }
 
 impl Camera {
@@ -24,6 +25,7 @@ impl Camera {
             up,
             right,
             rotation: Quaternion::identity(),
+            debug: String::new(),
         }
     }
 
@@ -38,6 +40,13 @@ impl Camera {
         let mut right = self.right.clone();
         up.rotate_by_quaternion(&self.rotation);
         right.rotate_by_quaternion(&self.rotation);
+
+        self.debug.clear();
+        self.debug.push_str(&format!("Camera position: {}\n", l.point.to_string()));
+        self.debug.push_str(&format!("Camera direction: {}\n", l.direction.to_string()));
+        self.debug.push_str(&format!("Camera up: {}\n", up.to_string()));
+        self.debug.push_str(&format!("Camera right: {}\n", right.to_string()));
+
         // ###########################################################################
 
         let mut hits: Vec<RayCastHit> = Vec::new();
@@ -67,5 +76,9 @@ impl Camera {
     pub fn default(&mut self) {
         self.line.point = self.default.0;
         self.line.direction = self.default.1;
+    }
+
+    pub fn get_debug_info(&self) -> String {
+        self.debug.clone()
     }
 }

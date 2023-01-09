@@ -28,8 +28,8 @@ mod camera;
 mod raycasthit;
 
 // globals
-const WIDTH: i32 = 1000;
-const HEIGHT: i32 = 1000;
+const WIDTH: i32 = 1850;
+const HEIGHT: i32 = 750;
 
 const RENDER_WIDTH: i32 = 60;
 const RENDER_HEIGHT: i32 = 60;
@@ -60,6 +60,10 @@ pub fn save_to_file(hits: &Vec<RayCastHit>) {
         }
 
     }
+}
+
+pub fn display_debug(c: &Camera) {
+    println!("{}", c.get_debug_info());
 }
 
 pub fn draw_slider(d: &mut RaylibDrawHandle, text: String, x: i32, y: &mut i32, value: &f32, range: (f32, f32)) -> f32 {
@@ -140,6 +144,7 @@ fn main() {
     let mut surfaces = vec![front, back, left, right, top, bottom];
     //let mut surfaces = vec![back, left, right,front];
     let mut surfaces = Object::new(surfaces);
+    //surfaces.scale(&2.0);
 
     //let mut hits: Vec<Vec<bool>> = vec![vec![false; RENDER_HEIGHT as usize]; RENDER_WIDTH as usize];
     //let mut angles: Vec<Vec<f64>> = vec![vec![0.0; RENDER_HEIGHT as usize]; RENDER_WIDTH as usize];
@@ -158,9 +163,9 @@ fn main() {
     let mut camera = Camera::new(
         camera_pos.clone(),
         Vector::new(0.0, 0.0, -1.0),
-        60, 60,
+        RENDER_WIDTH, RENDER_HEIGHT,
         Vector::new(0.0, 1.0, 0.0),
-        Vector::new(-1.0, 0.0, 0.0));
+        Vector::new(1.0, 0.0, 0.0));
 
     while !rl.window_should_close() {
         let mut d = rl.begin_drawing(&thread);
@@ -179,45 +184,90 @@ fn main() {
         for hit in hits.iter() {
             if hit.is_some() {
                 let color = Color::color_from_hsv(1.0, 1.0, (hit.angle().cos() as f32));
-                let (i, j) = hit.pos_on_screen;
+                let (i, mut j) = hit.pos_on_screen;
+                j = - j;
                 d.draw_rectangle((i * PIXEL_SIZE) as i32 + OFFSET.0, (j * PIXEL_SIZE) as i32 + OFFSET.1,PIXEL_SIZE as i32, PIXEL_SIZE as i32, color);
             }
         }
 
-        d.draw_text(&format!("Cube Control"), 205, 700, 32, Color::WHITE);
-        d.draw_text(&format!("Camera Control"), 700, 550, 32, Color::WHITE);
+        d.draw_text(&format!("Cube Control"), 125, 20, 32, Color::WHITE);
+        d.draw_text(&format!("Camera Control"), 1450, 20, 32, Color::WHITE);
 
-        if d.gui_button(Rectangle::new(400.0, 900.0,100.0, 50.0), None) {
-            save_to_file(&hits);
-        }
-        d.draw_text("save", 410, 905, 32, Color::WHITE);
+
         q = Quaternion::identity();
 
-        let mut slider_height = 750;
-        x = draw_slider(&mut d, "x cube rot".to_string(), 25, &mut slider_height, &mut x, (-30.0, 30.0));
-        y = draw_slider(&mut d, "y cube rot".to_string(), 25, &mut slider_height, &mut y, (-30.0, 30.0));
-        z = draw_slider(&mut d, "z cube rot".to_string(), 25, &mut slider_height, &mut z, (-30.0, 30.0));
+        let mut slider_height = 75;
+
+        d.draw_line_ex(
+            Vector2::new(25.0, slider_height as f32),
+            Vector2::new(535.0, slider_height as f32), 4.0, Color::BLACK);
+
+        slider_height += 20;
+
+        x = draw_slider(&mut d, "x cube rot".to_string(), 25, &mut slider_height, &mut x, (-10.0, 10.0));
+        y = draw_slider(&mut d, "y cube rot".to_string(), 25, &mut slider_height, &mut y, (-10.0, 10.0));
+        z = draw_slider(&mut d, "z cube rot".to_string(), 25, &mut slider_height, &mut z, (-10.0, 10.0));
         q.rotate(as_radians(x as f64), Vector::new(1.0, 0.0, 0.0));
         q.rotate(as_radians(y as f64), Vector::new(0.0, 1.0, 0.0));
         q.rotate(as_radians(z as f64), Vector::new(0.0, 0.0, 1.0));
 
-        let mut slider_height = 600;
+        slider_height += 20;
 
-        cam_x = draw_slider(&mut d, "x cam rot".to_string(), 520, &mut slider_height, &mut cam_x, (-180.0, 180.0));
-        cam_y = draw_slider(&mut d, "y cam rot".to_string(), 520, &mut slider_height, &mut cam_y, (-180.0, 180.0));
-        cam_z = draw_slider(&mut d, "z cam rot".to_string(), 520, &mut slider_height, &mut cam_z, (-180.0, 180.0));
+        d.draw_line_ex(
+            Vector2::new(25.0, slider_height as f32),
+            Vector2::new(535.0, slider_height as f32), 4.0, Color::BLACK);
+
+        surfaces.rotate(&q);
+
+        slider_height += 20;
+
+        if d.gui_button(Rectangle::new(400.0, slider_height as f32,100.0, 50.0), None) {
+            save_to_file(&hits);
+        }
+        d.draw_text("save", 410, slider_height + 5, 32, Color::WHITE);
+
+        let mut slider_height = 75;
+
+        d.draw_line_ex(
+            Vector2::new(1300.0, slider_height as f32),
+            Vector2::new(1830.0, slider_height as f32), 4.0, Color::BLACK);
+
+        slider_height += 20;
+
+        cam_x = draw_slider(&mut d, "x cam rot".to_string(), 1350, &mut slider_height, &mut cam_x, (-180.0, 180.0));
+        cam_y = draw_slider(&mut d, "y cam rot".to_string(), 1350, &mut slider_height, &mut cam_y, (-180.0, 180.0));
+        cam_z = draw_slider(&mut d, "z cam rot".to_string(), 1350, &mut slider_height, &mut cam_z, (-180.0, 180.0));
         camera_q = Quaternion::identity();
         camera_q.rotate(as_radians(cam_x as f64), Vector::new(1.0, 0.0, 0.0));
         camera_q.rotate(as_radians(cam_y as f64), Vector::new(0.0, 1.0, 0.0));
         camera_q.rotate(as_radians(cam_z as f64), Vector::new(0.0, 0.0, 1.0));
-        camera_pos.x = draw_slider(&mut d, "x cam pos".to_string(), 520, &mut slider_height, &mut (camera_pos.x as f32), (-30.0, 30.0)) as f64;
-        camera_pos.y = draw_slider(&mut d, "y cam pos".to_string(), 520, &mut slider_height, &mut (camera_pos.y as f32), (-30.0, 30.0)) as f64;
-        camera_pos.z = draw_slider(&mut d, "z cam pos".to_string(), 520, &mut slider_height, &mut (camera_pos.z as f32), (-30.0, 30.0)) as f64;
+
+        slider_height += 20;
+
+        d.draw_line_ex(
+            Vector2::new(1300.0, slider_height as f32),
+            Vector2::new(1830.0, slider_height as f32), 4.0, Color::BLACK);
+
+        slider_height += 20;
+
+        camera_pos.x = draw_slider(&mut d, "x cam pos".to_string(), 1350, &mut slider_height, &mut (camera_pos.x as f32), (-30.0, 30.0)) as f64;
+        camera_pos.y = draw_slider(&mut d, "y cam pos".to_string(), 1350, &mut slider_height, &mut (camera_pos.y as f32), (-30.0, 30.0)) as f64;
+        camera_pos.z = draw_slider(&mut d, "z cam pos".to_string(), 1350, &mut slider_height, &mut (camera_pos.z as f32), (-120.0, 120.0)) as f64;
 
         camera.set_camera_rotation(&camera_q);
         camera.set_camera_position(&camera_pos);
 
-        surfaces.rotate(&q);
+        slider_height += 20;
+
+        d.draw_line_ex(
+            Vector2::new(1300.0, slider_height as f32),
+            Vector2::new(1830.0, slider_height as f32), 4.0, Color::BLACK);
+        slider_height += 20;
+
+        if d.gui_button(Rectangle::new(1600.0, slider_height as f32,100.0, 50.0), None) {
+            display_debug(&camera);
+        }
+
         //println!("v: {}, w: {}, n: {}", surface.v.unwrap().to_string(), surface.w.unwrap().to_string(), surface.normal.to_string());
 
     }

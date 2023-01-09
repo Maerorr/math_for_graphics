@@ -15,4 +15,10 @@ impl Object {
             surface.rotate(q);
         }
     }
+
+    pub fn scale(&mut self, s: &f64) {
+        for surface in &mut self.surfaces {
+            surface.scale(s);
+        }
+    }
 }

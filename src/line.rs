@@ -98,6 +98,7 @@ impl Line {
         }
         if closest_intersection.is_some() {
             if closest_intersection.angle().cos() < 0.0 {
+                //println!("camera pos: {}, hit: {}, angle: {}", cam_pos.to_string(), closest_intersection.unwrap().0.to_string(), closest_intersection.angle());
                 closest_intersection = RayCastHit::new(None);
             }
         }
