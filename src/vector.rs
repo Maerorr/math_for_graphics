@@ -94,6 +94,10 @@ impl Vector {
         self.z = vprime.z;
     }
 
+    pub fn distance(&self, other: &Vector) -> f64 {
+        ((other.x - self.x).powi(2) + (other.y - self.y).powi(2) + (other.z - self.z).powi(2)).sqrt()
+    }
+
     /// Converts a vector to a string and returns it
     pub fn to_string(&self) -> String {
         let out: String = format!("[{:.2}, {:.2}, {:.2}]", self.x, self.y, self.z);

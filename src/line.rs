@@ -1,9 +1,11 @@
 use float_cmp::{approx_eq, F64Margin};
 use crate::object::Object;
 use crate::point::Point;
+use crate::raycasthit::RayCastHit;
 use crate::surface::Surface;
 use crate::vector::Vector;
 
+#[derive(Debug, Clone, Copy)]
 pub struct Line {
     pub point: Vector,
     pub direction: Vector,
@@ -53,10 +55,10 @@ impl Line {
     }
 
     // Returns the point of intersection if they intersect. Otherwise returns None.
-    pub fn intersection_surface(&self, surface: &Surface) -> Option<(Vector, f64)> {
+    pub fn intersection_surface(&self, surface: &Surface) -> RayCastHit {
         let parallel_check = self.direction.dot(&surface.normal);
         if approx_eq!(f64, parallel_check, 0.0, F64Margin::default()) {
-            None
+            RayCastHit::new(None)
         } else {
             let t = ((surface.normal * -1.0).dot(&(self.point - surface.point)))
                 / (surface.normal.dot(&self.direction));
@@ -66,28 +68,37 @@ impl Line {
 
             // this checks if the intersection isnt outside of out bound surface (a rectangle)
             if surface.point_on_surface(&t, &s).is_none() {
-                None
+                RayCastHit::new(None)
             } else {
-                Some((intersection, angle))
+                RayCastHit::new(Some((intersection, angle)))
             }
         }
     }
 
-    pub fn intersection_object(&self, obj: &Object, cam_pos: &Vector) -> Option<(Vector, f64)> {
-        let mut closest_intersection: Option<(Vector, f64)> = None;
+    pub fn intersection_object(&self, obj: &Object, cam_pos: &Vector) -> RayCastHit {
+        let mut closest_intersection: RayCastHit = RayCastHit::new(None);
         let mut closest_distance: f64 = 0.0;
+
         for surface in &obj.surfaces {
+            // intersection with each surface
             let intersection = self.intersection_surface(&surface);
+            // if we have a hit
             if intersection.is_some() {
                 let intersection = intersection.unwrap();
-                let distance = (*cam_pos - intersection.0).length();
+                let distance = (*cam_pos).distance(&intersection.0);
+
                 if closest_intersection.is_none() {
-                    closest_intersection = Some((intersection.0, intersection.1));
+                    closest_intersection = RayCastHit::new(Some(intersection));
                     closest_distance = distance;
                 } else if distance < closest_distance {
-                    closest_intersection = Some((intersection.0, intersection.1));
+                    closest_intersection = RayCastHit::new(Some(intersection));
                     closest_distance = distance;
                 }
+            }
+        }
+        if closest_intersection.is_some() {
+            if closest_intersection.angle().cos() < 0.0 {
+                closest_intersection = RayCastHit::new(None);
             }
         }
         closest_intersection
