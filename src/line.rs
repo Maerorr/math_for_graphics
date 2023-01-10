@@ -75,7 +75,7 @@ impl Line {
         }
     }
 
-    pub fn intersection_object(&self, obj: &Object, cam_pos: &Vector) -> RayCastHit {
+    pub fn intersection_object(&self, obj: &Object, cam_pos: &Vector, bfc: &bool) -> RayCastHit {
         let mut closest_intersection: RayCastHit = RayCastHit::new(None);
         let mut closest_distance: f64 = 0.0;
 
@@ -84,22 +84,29 @@ impl Line {
             let intersection = self.intersection_surface(&surface);
             // if we have a hit
             if intersection.is_some() {
-                let intersection = intersection.unwrap();
-                let distance = (*cam_pos).distance(&intersection.0);
 
-                if closest_intersection.is_none() {
-                    closest_intersection = RayCastHit::new(Some(intersection));
-                    closest_distance = distance;
-                } else if distance < closest_distance {
-                    closest_intersection = RayCastHit::new(Some(intersection));
-                    closest_distance = distance;
+                let from_cam_to_point = intersection.unwrap().0 - *cam_pos;
+
+                if from_cam_to_point.dot(&self.direction) >= 0.0 {
+                    let intersection = intersection.unwrap();
+                    let distance = (*cam_pos).distance(&intersection.0);
+
+                    if closest_intersection.is_none() {
+                        closest_intersection = RayCastHit::new(Some(intersection));
+                        closest_distance = distance;
+                    } else if distance < closest_distance {
+                        closest_intersection = RayCastHit::new(Some(intersection));
+                        closest_distance = distance;
+                    }
                 }
             }
         }
         if closest_intersection.is_some() {
-            if closest_intersection.angle().cos() < 0.0 {
-                //println!("camera pos: {}, hit: {}, angle: {}", cam_pos.to_string(), closest_intersection.unwrap().0.to_string(), closest_intersection.angle());
-                closest_intersection = RayCastHit::new(None);
+            if *bfc {
+                if closest_intersection.angle().cos() < 0.0 {
+                    //println!("camera pos: {}, hit: {}, angle: {}", cam_pos.to_string(), closest_intersection.unwrap().0.to_string(), closest_intersection.angle());
+                    closest_intersection = RayCastHit::new(None);
+                }
             }
         }
         closest_intersection

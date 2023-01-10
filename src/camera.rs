@@ -13,6 +13,7 @@ pub struct Camera {
     default: (Vector, Vector),
     rotation: Quaternion,
     debug: String,
+    pub backface_culling: bool,
 }
 
 impl Camera {
@@ -26,6 +27,7 @@ impl Camera {
             right,
             rotation: Quaternion::identity(),
             debug: String::new(),
+            backface_culling: false,
         }
     }
 
@@ -53,7 +55,7 @@ impl Camera {
         for i in (-self.render_height / 2)..(self.render_height / 2) {
             for j in (-self.render_width / 2)..(self.render_width / 2) {
                 l.point = point + up * i as f64 + right * j as f64;
-                let mut hit = l.intersection_object(&object, &l.point);
+                let mut hit = l.intersection_object(&object, &l.point, &self.backface_culling);
                 hit.pos_on_screen = (j, i);
                 hits.push(hit);
             }

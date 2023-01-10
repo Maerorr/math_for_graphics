@@ -90,12 +90,16 @@ fn main() {
     rl.set_target_fps(72);
     // window init
 
-    // let mut surface = Surface::new_vw(
-    //     Vector::new(30.0, 30.0, 0.0),
-    //     Vector::new(1.0, 0.0, 0.0),
-    //     Vector::new(0.0, 1.0, 0.0),
-    //     (-15.0, 15.0),
-    //     (-15.0, 15.0));
+    let mut v1 = Vector::new(1.0, 0.0, 0.0);
+    let mut v2 = Vector::new(-1.0, 0.0, 0.0);
+    let mut v3 = Vector::new(2.0, 0.0, 0.0);
+    let mut v4 = v1.clone();
+    println!("v1.dot(v2) {}", v1.dot(&v2));
+    println!("v1.dot(v3) {}", v1.dot(&v3));
+    println!("v1.cross(v2) {}", v1.cross(&v4).to_string());
+    println!("v1.cross(v3) {}", v1.cross(&v3).to_string());
+
+
 
     // initialize surfaces that create a cube
     let mut front = Surface::new_vw(
@@ -183,7 +187,7 @@ fn main() {
 
         for hit in hits.iter() {
             if hit.is_some() {
-                let color = Color::color_from_hsv(1.0, 1.0, (hit.angle().cos() as f32));
+                let color = Color::color_from_hsv(1.0, 1.0, (hit.angle().cos() as f32).abs());
                 let (i, mut j) = hit.pos_on_screen;
                 j = - j;
                 d.draw_rectangle((i * PIXEL_SIZE) as i32 + OFFSET.0, (j * PIXEL_SIZE) as i32 + OFFSET.1,PIXEL_SIZE as i32, PIXEL_SIZE as i32, color);
@@ -264,9 +268,9 @@ fn main() {
             Vector2::new(1830.0, slider_height as f32), 4.0, Color::BLACK);
         slider_height += 20;
 
-        if d.gui_button(Rectangle::new(1600.0, slider_height as f32,100.0, 50.0), None) {
-            display_debug(&camera);
-        }
+        camera.backface_culling = d.gui_check_box(Rectangle::new(1750.0, slider_height as f32,50.0, 50.0), None, camera.backface_culling);
+
+        d.draw_text("Backface Culling", 1410, slider_height + 5, 32, Color::WHITE);
 
         //println!("v: {}, w: {}, n: {}", surface.v.unwrap().to_string(), surface.w.unwrap().to_string(), surface.normal.to_string());
 
