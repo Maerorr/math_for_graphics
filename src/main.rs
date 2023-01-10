@@ -162,7 +162,7 @@ fn main() {
     let (mut x, mut y, mut z) = (0.0, 0.0, 0.0);
     let (mut cam_x, mut cam_y, mut cam_z) = (0.0, 0.0, 0.0);
 
-    let mut camera_pos = Vector::new(0.0, 0.0, 20.0);
+    let mut camera_pos = Vector::new(0.0, 0.0, 50.0);
 
     let mut camera = Camera::new(
         camera_pos.clone(),
@@ -171,26 +171,45 @@ fn main() {
         Vector::new(0.0, 1.0, 0.0),
         Vector::new(1.0, 0.0, 0.0));
 
+    let mut first_frame: bool = true;
+
+    let mut cube_color: Color = Color::new(255, 0, 0, 255);
+
     while !rl.window_should_close() {
         let mut d = rl.begin_drawing(&thread);
         d.clear_background(BG_COLOR);
 
         hits = camera.render(&surfaces);
 
-        for i in (-RENDER_HEIGHT / 2)..(RENDER_HEIGHT / 2) {
-            for j in (-RENDER_WIDTH / 2)..(RENDER_WIDTH / 2) {
-                if i == -RENDER_WIDTH / 2 || i == RENDER_WIDTH / 2 - 1 || j == -RENDER_HEIGHT / 2 || j == RENDER_HEIGHT / 2 - 1 {
-                    d.draw_rectangle((i * PIXEL_SIZE) as i32 + OFFSET.0, (j * PIXEL_SIZE) as i32 + OFFSET.1,PIXEL_SIZE as i32, PIXEL_SIZE as i32, Color::BLACK);
-                }
+        for hit in hits.iter() {
+            if hit.is_some() {
+                // the hit color value calculated to be sqrt( sin(|angle|) )
+                let color_value = {
+                    let angle_cos = hit.angle().cos();
+                    if angle_cos >= 0.0 {
+                        angle_cos.sqrt()
+                    } else {
+                        angle_cos.abs().sqrt()
+                    }
+                };
+
+                //let color = Color::color_from_hsv(1.0, 1.0, color_value as f32);
+                let color = Color::new(
+                    ((color_value) * cube_color.r as f64) as u8,
+                    ((color_value) * cube_color.g as f64) as u8,
+                    ((color_value) * cube_color.b as f64) as u8,
+                    255);
+                let (i, mut j) = hit.pos_on_screen;
+                j = -j;
+                d.draw_rectangle((i * PIXEL_SIZE) as i32 + OFFSET.0, (j * PIXEL_SIZE) as i32 + OFFSET.1,PIXEL_SIZE as i32, PIXEL_SIZE as i32, color);
             }
         }
 
-        for hit in hits.iter() {
-            if hit.is_some() {
-                let color = Color::color_from_hsv(1.0, 1.0, (hit.angle().cos() as f32).abs());
-                let (i, mut j) = hit.pos_on_screen;
-                j = - j;
-                d.draw_rectangle((i * PIXEL_SIZE) as i32 + OFFSET.0, (j * PIXEL_SIZE) as i32 + OFFSET.1,PIXEL_SIZE as i32, PIXEL_SIZE as i32, color);
+        for i in (-RENDER_HEIGHT / 2)..(RENDER_HEIGHT / 2 + 1) {
+            for j in (-RENDER_WIDTH / 2)..(RENDER_WIDTH / 2 + 1) {
+                if i == -RENDER_WIDTH / 2 || i == RENDER_WIDTH / 2 || j == -RENDER_HEIGHT / 2 || j == RENDER_HEIGHT / 2 {
+                    d.draw_rectangle((i * PIXEL_SIZE) as i32 + OFFSET.0, (j * PIXEL_SIZE) as i32 + OFFSET.1,PIXEL_SIZE as i32, PIXEL_SIZE as i32, Color::BLACK);
+                }
             }
         }
 
@@ -229,6 +248,12 @@ fn main() {
             save_to_file(&hits);
         }
         d.draw_text("save", 410, slider_height + 5, 32, Color::WHITE);
+
+        d.draw_text("Cube Color", 100, slider_height + 50, 32, Color::WHITE);
+
+        slider_height += 100;
+
+        cube_color = d.gui_color_picker(Rectangle::new(25., slider_height as f32, 300., 300.), cube_color);
 
         let mut slider_height = 75;
 
